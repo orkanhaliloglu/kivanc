@@ -1,7 +1,7 @@
 -- Give every athlete a separate weekly plan while preserving existing plans.
 create table if not exists public.user_workout_plans (
   user_id uuid not null references public.profiles(id) on delete cascade,
-  weekday smallint not null check (weekday between 1 and 5),
+  weekday smallint not null check (weekday between 1 and 7),
   plan_type text not null check (plan_type in ('upper','legs','mobility')),
   label text not null,
   items jsonb not null check (jsonb_typeof(items) = 'array'),

@@ -19,7 +19,7 @@ create table if not exists public.daily_records (
 );
 
 create table if not exists public.workout_plans (
-  weekday smallint primary key check (weekday between 1 and 5),
+  weekday smallint primary key check (weekday between 1 and 7),
   plan_type text not null check (plan_type in ('upper','legs','mobility')),
   label text not null,
   items jsonb not null check (jsonb_typeof(items) = 'array'),
