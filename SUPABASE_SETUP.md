@@ -16,4 +16,4 @@ Bu sürüm Supabase Auth ile e-posta/şifre girişi, kullanıcıya özel günlü
 2. Yeni dağıtımda yönetici hesabıyla giriş yap. Yönetim panelinden bir sporcu hesabı oluştur; bu işlem dağıtılmış `admin-create-user` fonksiyonunu kullanır.
 3. Eski tarayıcıdaki yerel kayıtları taşımak için aynı tarayıcıda ve aynı site adresinde yönetim panelindeki aktarım düğmesini kullan. Aktarım, mevcut tarihlerdeki bulut kayıtlarını ezmez.
 
-Genel kullanıcı kaydı ayarı henüz değiştirilmedi. Yönetici dışındaki kişilerin kendi kendine hesap açmasını kapatmak için Supabase Authentication > Sign In / Providers > Email bölümündeki **Allow new users to sign up** ayarını kapat.
+Genel kullanıcı kaydı Supabase Authentication > Sign In / Providers > **Allow new users to sign up** ayarından kapatıldı. Yeni hesapları yalnızca admin oluşturabilir.
