@@ -22,10 +22,10 @@ Deno.serve(async (req) => {
   const userClient = createClient(url, anonKey, { global: { headers: { Authorization: authorization } } });
   const { data: authData, error: authError } = await userClient.auth.getUser();
   if (authError || !authData.user) return json({ error: 'Unauthorized' }, 401);
+  const { data: isAdmin, error: profileError } = await userClient.rpc('is_ritim_admin');
+  if (profileError) return json({ error: `Admin role check failed: ${profileError.message}` }, 500);
+  if (isAdmin !== true) return json({ error: 'Admin access required' }, 403);
   const adminClient = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
-  const { data: adminProfile, error: profileError } = await adminClient
-    .from('profiles').select('role').eq('id', authData.user.id).single();
-  if (profileError || adminProfile?.role !== 'admin') return json({ error: 'Admin access required' }, 403);
 
   let input: { email?: string; password?: string; full_name?: string };
   try { input = await req.json(); } catch { return json({ error: 'Invalid JSON body' }, 400); }
