@@ -27,8 +27,23 @@ Deno.serve(async (req) => {
   if (isAdmin !== true) return json({ error: 'Admin access required' }, 403);
   const adminClient = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
 
-  let input: { email?: string; password?: string; full_name?: string };
+  let input: { action?: string; email?: string; user_id?: string; password?: string; full_name?: string };
   try { input = await req.json(); } catch { return json({ error: 'Invalid JSON body' }, 400); }
+  if (input.action === 'reset-password') {
+    const userId = input.user_id?.trim();
+    const password = input.password;
+    if (!userId || !password || password.length < 8) {
+      return json({ error: 'A user ID and a password of at least 8 characters are required' }, 400);
+    }
+    const { data: target, error: targetError } = await adminClient
+      .from('profiles').select('id,role').eq('id', userId).maybeSingle();
+    if (targetError) return json({ error: `Target user lookup failed: ${targetError.message}` }, 500);
+    if (!target || target.role !== 'athlete') return json({ error: 'Only athlete accounts can be reset' }, 403);
+    const { error: updateError } = await adminClient.auth.admin.updateUserById(userId, { password });
+    if (updateError) return json({ error: updateError.message }, 400);
+    return json({ id: userId, success: true });
+  }
+  if (input.action && input.action !== 'create-user') return json({ error: 'Unsupported action' }, 400);
   const email = input.email?.trim().toLowerCase();
   const fullName = input.full_name?.trim();
   const password = input.password;

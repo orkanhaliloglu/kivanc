@@ -10,7 +10,7 @@ Bu sürüm Supabase Auth ile e-posta/şifre girişi, kullanıcıya özel günlü
 - `supabase/user-workout-plans-self-edit.sql` geçişi, sporcuların yalnızca kendi planlarını eklemesine, düzenlemesine ve kaldırmasına izin verir; yöneticiler diğer kullanıcıların planlarını yönetmeye devam eder.
 - `supabase/weekend-workout-days.sql` geçişi hafta sonu planları için 6 (Cumartesi) ve 7 (Pazar) değerlerini açar.
 - İlk kullanıcı Supabase Authentication'da oluşturuldu ve `profiles.role` değeri `admin` olarak ayarlandı.
-- `admin-create-user` Edge Function Supabase Dashboard üzerinden dağıtıldı. Kaynak kodu `supabase/functions/admin-create-user/index.ts` dosyasında tutulur. Bu fonksiyon çağıranın oturumunu ve admin rolünü doğrular; `service_role` anahtarı yalnızca sunucu tarafında kullanılır.
+- `admin-create-user` Edge Function Supabase Dashboard üzerinden dağıtıldı. Kaynak kodu `supabase/functions/admin-create-user/index.ts` dosyasında tutulur. Bu fonksiyon çağıranın oturumunu ve admin rolünü doğrular; kullanıcı oluşturmanın yanında yalnızca sporcu hesaplarının parolasını da sıfırlayabilir. `service_role` anahtarı yalnızca sunucu tarafında kullanılır.
 - `config.js` içinde proje URL'si ve tarayıcı için güvenli publishable anahtar ayarlı. `service_role` anahtarını buraya veya Git'e koyma.
 
 ## Kalan yayın adımları
