@@ -31,15 +31,11 @@ async function loadProfiles(){let {data,error}=await client.from('profiles').sel
 async function updateProfileAvatar(){
   const avatar=$('profileAvatar');
   if(!avatar)return;
-  const mamiEmail='mamioksuz1@gmail.com';
-  const mami=profiles.find(p=>p.email?.toLowerCase()===mamiEmail);
   const selectedProfile=isAdmin?profiles.find(p=>p.id===activeUserId):profile;
-  const allowed=selectedProfile?.email?.toLowerCase()===mamiEmail;
-  if(!allowed){avatar.removeAttribute('src');avatar.classList.add('hide');return}
-  const mamiId=mami?.id||profile?.id;
-  if(!mamiId){avatar.classList.add('hide');return}
-  const {data,error}=await client.storage.from('ritim-avatars').createSignedUrl(`${mamiId}/avatar.jpeg`,3600);
-  if(error||!data?.signedUrl){avatar.removeAttribute('src');avatar.classList.add('hide');console.warn('Mami avatar yüklenemedi:',error?.message||'İmzalı bağlantı alınamadı');return}
+  const avatarProfiles=new Set(['mamioksuz1@gmail.com','haliloglukivanc5@gmail.com']);
+  if(!selectedProfile?.id||!avatarProfiles.has(selectedProfile.email?.toLowerCase())){avatar.removeAttribute('src');avatar.classList.add('hide');return}
+  const {data,error}=await client.storage.from('ritim-avatars').createSignedUrl(`${selectedProfile.id}/avatar.jpeg`,3600);
+  if(error||!data?.signedUrl){avatar.removeAttribute('src');avatar.classList.add('hide');console.warn('Profil fotoğrafı yüklenemedi:',error?.message||'İmzalı bağlantı alınamadı');return}
   avatar.src=data.signedUrl;
   avatar.classList.remove('hide');
 }
