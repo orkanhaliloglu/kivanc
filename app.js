@@ -28,7 +28,22 @@ function leave(){session=null;profile=null;isAdmin=false;activeUserId=null;recor
 async function logout(){if(client)await client.auth.signOut();leave()}
 async function loadPlans(userId){if(!userId)return;plans=structuredClone(defaults);let {data,error}=await client.from('user_workout_plans').select('weekday,plan_type,label,items').eq('user_id',userId);if(error){$('adminStatus').textContent='Antrenman planları yüklenemedi: '+error.message;fillPlanEditor();renderAll();return}(data||[]).forEach(p=>plans[p.weekday]={type:p.plan_type,label:p.label,items:p.items});fillPlanEditor();fillSelfPlanEditor();renderAll()}
 async function loadProfiles(){let {data,error}=await client.from('profiles').select('id,email,full_name,role').order('full_name');if(error){adminMessage('Kullanıcı listesi alınamadı: '+error.message);$('userDirectory').innerHTML=`<p class="user-list-error">Kullanıcılar yüklenemedi: ${esc(error.message)}</p>`;return}profiles=data||[];let selectable=profiles.filter(p=>p.role!=='admin');let options=selectable.map(p=>`<option value="${p.id}">${esc(p.full_name||p.email)} · ${esc(p.email)}</option>`).join('');$('userSelect').innerHTML=options||'<option value="">Henüz sporcu hesabı yok</option>';$('passwordUserSelect').innerHTML=options||'<option value="">Henüz sporcu hesabı yok</option>';$('userDirectory').innerHTML=selectable.length?selectable.map(p=>`<div class="user-directory-row"><div><strong>${esc(p.full_name||'İsimsiz kullanıcı')}</strong><small>${esc(p.email)}</small></div><button class="btn" type="button" data-open-user="${esc(p.id)}">Kayıtları gör</button></div>`).join(''):'<p class="empty">Henüz sporcu hesabı bulunmuyor.</p>';document.querySelectorAll('[data-open-user]').forEach(b=>b.onclick=async()=>{let id=b.dataset.openUser;$('userSelect').value=id;$('passwordUserSelect').value=id;await loadPlans(id);await loadRecords(id)});if(!selectable.length){fillPlanEditor();return}let target=selectable.find(p=>p.id===activeUserId)||selectable[0];$('userSelect').value=target.id;$('passwordUserSelect').value=target.id;await loadPlans(target.id)}
-async function loadRecords(userId){if(!userId)return;activeUserId=userId;let {data,error}=await client.from('daily_records').select('record_date,data').eq('user_id',userId);if(error){notice('Kayıtlar yüklenemedi: '+error.message);return}records={};(data||[]).forEach(row=>records[row.record_date]={done:Array.isArray(row.data?.done)?row.data.done:[],sleepGoal:!!row.data?.sleepGoal,bed:row.data?.bed||'',note:row.data?.note||''});renderAll()}
+async function updateProfileAvatar(){
+  const avatar=$('profileAvatar');
+  if(!avatar)return;
+  const mamiEmail='mamioksuz1@gmail.com';
+  const mami=profiles.find(p=>p.email?.toLowerCase()===mamiEmail);
+  const selectedProfile=isAdmin?profiles.find(p=>p.id===activeUserId):profile;
+  const allowed=selectedProfile?.email?.toLowerCase()===mamiEmail;
+  if(!allowed){avatar.removeAttribute('src');avatar.classList.add('hide');return}
+  const mamiId=mami?.id||profile?.id;
+  if(!mamiId){avatar.classList.add('hide');return}
+  const {data,error}=await client.storage.from('ritim-avatars').createSignedUrl(`${mamiId}/avatar.jpeg`,3600);
+  if(error||!data?.signedUrl){avatar.removeAttribute('src');avatar.classList.add('hide');console.warn('Mami avatar yüklenemedi:',error?.message||'İmzalı bağlantı alınamadı');return}
+  avatar.src=data.signedUrl;
+  avatar.classList.remove('hide');
+}
+async function loadRecords(userId){if(!userId)return;activeUserId=userId;let {data,error}=await client.from('daily_records').select('record_date,data').eq('user_id',userId);if(error){notice('Kayıtlar yüklenemedi: '+error.message);return}records={};(data||[]).forEach(row=>records[row.record_date]={done:Array.isArray(row.data?.done)?row.data.done:[],sleepGoal:!!row.data?.sleepGoal,bed:row.data?.bed||'',note:row.data?.note||''});renderAll();await updateProfileAvatar()}
 async function saveRecord(date=selected){let r=rec(date);$('saveState').textContent='● Kaydediliyor';let {error}=await client.from('daily_records').upsert({user_id:activeUserId,record_date:date,data:r,updated_at:new Date().toISOString()},{onConflict:'user_id,record_date'});if(error){$('saveState').textContent='● Kaydedilemedi';notice('Kayıt kaydedilemedi: '+error.message);return}renderCalendar();renderStats();$('saveState').textContent='● Buluta kaydedildi'}
 function renderAll(){renderCalendar();renderDay();renderStats()}
 function complete(date){let p=planned(date),r=records[date];return !!p&&!!r&&p.items.every(x=>r.done?.includes(x[0]))}
