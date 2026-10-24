@@ -35,7 +35,9 @@ Deno.serve(async (req) => {
     if (!userId || !password || password.length < 8) {
       return json({ error: 'A user ID and a password of at least 8 characters are required' }, 400);
     }
-    const { data: target, error: targetError } = await adminClient
+    // Read through the authenticated admin session so the existing admin RLS policy
+    // authorizes profile lookup; the service-role key does not need table grants.
+    const { data: target, error: targetError } = await userClient
       .from('profiles').select('id,role').eq('id', userId).maybeSingle();
     if (targetError) return json({ error: `Target user lookup failed: ${targetError.message}` }, 500);
     if (!target || target.role !== 'athlete') return json({ error: 'Only athlete accounts can be reset' }, 403);
