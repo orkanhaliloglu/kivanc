@@ -1,0 +1,7 @@
+{
+  "name": "Ritim — Uyku & Antrenman Takvimi",
+  "description": "Kişisel uyku, ders ve antrenman takibi uygulaması: haftalık program yönetimi, antrenör raporu ve aylık ritim istatistikleri.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
